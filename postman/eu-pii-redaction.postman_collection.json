@@ -1,0 +1,318 @@
+{
+  "info": {
+    "name": "EU PII Redaction API",
+    "description": "Redact European personal data (names, national ID numbers from 21 EU/EEA countries, IBANs, cards, EU VAT numbers, emails, phones, IPs) before text reaches an LLM, and restore it afterwards.\n\n1. Subscribe to a plan (free: 500 requests/month): https://rapidapi.com/JulianJohansen/api/eu-pii-redaction/pricing\n2. Set the collection variable `rapidapi_key` to your RapidAPI key.\n3. Send a request.\n\nPython client, LangChain integration and MCP server: https://github.com/JulianJohansen/eu-pii-redact",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "{{auth_header}}",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{rapidapi_key}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "rapidapi_key",
+      "value": "",
+      "description": "Your RapidAPI key"
+    },
+    {
+      "key": "base_url",
+      "value": "https://eu-pii-redaction.p.rapidapi.com"
+    },
+    {
+      "key": "host",
+      "value": "eu-pii-redaction.p.rapidapi.com"
+    },
+    {
+      "key": "auth_header",
+      "value": "X-RapidAPI-Key",
+      "description": "Header the key is sent in; leave as is"
+    }
+  ],
+  "item": [
+    {
+      "name": "Redact with placeholders",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "const r = pm.response.json();",
+              "pm.test(\"same person keeps one placeholder\", () => pm.expect(r.redacted.split('[PERSON_1]').length === 3).to.be.true);",
+              "pm.test(\"order number untouched\", () => pm.expect(r.redacted.includes('order 88412')).to.be.true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-RapidAPI-Host",
+            "value": "{{host}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Hi, my name is Karina Dahl. I was charged twice for order 88412.\\nPlease refund to DK50 0040 0440 1162 43 or call me on +45 32 12 34 56.\\nKarina\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/redact",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "redact"
+          ]
+        },
+        "description": "Replace personal data with [TYPE_n] placeholders. Mentions of the same person share one placeholder; each entity has its offsets in the original text and its placeholder, so you can restore values in an LLM's answer."
+      },
+      "response": [
+        {
+          "name": "Example",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"redacted\": \"Hi, my name is [PERSON_1]. I was charged twice for order 88412.\\nPlease refund to [IBAN_1] or call me on [PHONE_1].\\n[PERSON_1]\",\n  \"entities\": [\n    {\n      \"type\": \"PERSON\",\n      \"start\": 15,\n      \"end\": 26,\n      \"placeholder\": \"[PERSON_1]\"\n    },\n    {\n      \"type\": \"IBAN\",\n      \"start\": 82,\n      \"end\": 104,\n      \"placeholder\": \"[IBAN_1]\"\n    },\n    {\n      \"type\": \"PHONE\",\n      \"start\": 119,\n      \"end\": 134,\n      \"placeholder\": \"[PHONE_1]\"\n    },\n    {\n      \"type\": \"PERSON\",\n      \"start\": 136,\n      \"end\": 142,\n      \"placeholder\": \"[PERSON_1]\"\n    }\n  ]\n}",
+          "originalRequest": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/redact"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"text\": \"Hi, my name is Karina Dahl. I was charged twice for order 88412.\\nPlease refund to DK50 0040 0440 1162 43 or call me on +45 32 12 34 56.\\nKarina\"}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mask emails only",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "const r = pm.response.json();",
+              "pm.test(\"email masked\", () => pm.expect(r.redacted === 'Karina Dahl <***********************>').to.be.true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-RapidAPI-Host",
+            "value": "{{host}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Karina Dahl <karina.dahl@example.com>\",\n  \"types\": [\n    \"EMAIL\"\n  ],\n  \"mode\": \"mask\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/redact",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "redact"
+          ]
+        },
+        "description": "Mode 'mask' replaces characters with asterisks; 'types' limits detection."
+      },
+      "response": [
+        {
+          "name": "Example",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"redacted\": \"Karina Dahl <***********************>\",\n  \"entities\": [\n    {\n      \"type\": \"EMAIL\",\n      \"start\": 13,\n      \"end\": 36\n    }\n  ]\n}",
+          "originalRequest": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/redact"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"text\": \"Karina Dahl <karina.dahl@example.com>\", \"types\": [\"EMAIL\"], \"mode\": \"mask\"}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "National ID numbers",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "const r = pm.response.json();",
+              "pm.test(\"three IDs found\", () => pm.expect(r.entities.length === 3).to.be.true);",
+              "pm.test(\"country and scheme reported\", () => pm.expect(r.entities[0].country === 'PL' && r.entities[0].scheme === 'PESEL').to.be.true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-RapidAPI-Host",
+            "value": "{{host}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"PESEL: 44051401359, personnummer 880320-0016, DNI 54362315-K\",\n  \"types\": [\n    \"NATIONAL_ID\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/redact",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "redact"
+          ]
+        },
+        "description": "National IDs from 21 EU/EEA countries, validated by check digit and birth date. Weak-checksum schemes (PESEL, BSN, CPR, ...) need a label such as 'PESEL:'."
+      },
+      "response": [
+        {
+          "name": "Example",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"redacted\": \"PESEL: [NATIONAL_ID_1], personnummer [NATIONAL_ID_2], DNI [NATIONAL_ID_3]\",\n  \"entities\": [\n    {\n      \"type\": \"NATIONAL_ID\",\n      \"start\": 7,\n      \"end\": 18,\n      \"country\": \"PL\",\n      \"scheme\": \"PESEL\",\n      \"placeholder\": \"[NATIONAL_ID_1]\"\n    },\n    {\n      \"type\": \"NATIONAL_ID\",\n      \"start\": 33,\n      \"end\": 44,\n      \"country\": \"SE\",\n      \"scheme\": \"personnummer\",\n      \"placeholder\": \"[NATIONAL_ID_2]\"\n    },\n    {\n      \"type\": \"NATIONAL_ID\",\n      \"start\": 50,\n      \"end\": 60,\n      \"country\": \"ES\",\n      \"scheme\": \"DNI\",\n      \"placeholder\": \"[NATIONAL_ID_3]\"\n    }\n  ]\n}",
+          "originalRequest": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/redact"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"text\": \"PESEL: 44051401359, personnummer 880320-0016, DNI 54362315-K\", \"types\": [\"NATIONAL_ID\"]}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "List entity types",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "pm.test('includes PERSON', () => pm.expect(pm.response.json().types).to.include('PERSON'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-RapidAPI-Host",
+            "value": "{{host}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/types",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "types"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Example",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"types\": [\n    \"EMAIL\",\n    \"IBAN\",\n    \"NATIONAL_ID\",\n    \"CREDIT_CARD\",\n    \"EU_VAT\",\n    \"IP_ADDRESS\",\n    \"PHONE\",\n    \"PERSON\"\n  ]\n}"
+        }
+      ]
+    }
+  ]
+}
