@@ -1,0 +1,6 @@
+[project]
+name = "eu-pii-redact-mcpb"
+version = "0.1.0"
+description = "MCPB bundle for the eu-pii-redact MCP server"
+requires-python = ">=3.10"
+dependencies = ["eu-pii-redact==0.1.0"]

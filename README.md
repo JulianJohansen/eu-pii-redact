@@ -76,6 +76,10 @@ never enters the conversation. `restore_file` puts the values back locally.
 | `redact_file` | Redact a UTF-8 file into a new file; writes a restore mapping (owner-only permissions) |
 | `restore_file` | Put the original values back into a file using that mapping, offline |
 
+**Claude Desktop (one click):** download `eu-pii-redact-0.1.0.mcpb` from the
+[latest release](https://github.com/JulianJohansen/eu-pii-redact/releases/latest), open it, and paste
+your RapidAPI key when asked. The bundle sources are in `mcpb/`.
+
 **Claude Code**
 ```bash
 claude mcp add eu-pii-redact -e RAPIDAPI_KEY=your-key -- uvx eu-pii-redact

@@ -1,0 +1,40 @@
+{
+  "manifest_version": "0.4",
+  "name": "eu-pii-redact",
+  "display_name": "EU PII Redaction",
+  "version": "0.1.0",
+  "description": "Redact European personal data (names, national IDs, IBANs, emails, phones) in text and files, and restore it later.",
+  "long_description": "Replaces personal data with placeholders like [PERSON_1] and [IBAN_1]. redact_file and restore_file process files without the personal data ever entering the conversation. Detects names from evidence, national ID numbers from 21 EU/EEA countries (validated by check digit and birth date), IBANs, cards, EU VAT numbers, emails, phones and IPs. Needs a RapidAPI key for the EU PII Redaction API (free plan: 500 requests/month).",
+  "author": { "name": "JulianJohansen", "url": "https://github.com/JulianJohansen" },
+  "homepage": "https://rapidapi.com/JulianJohansen/api/eu-pii-redaction",
+  "repository": { "type": "git", "url": "https://github.com/JulianJohansen/eu-pii-redact" },
+  "server": {
+    "type": "uv",
+    "entry_point": "src/server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "--directory", "${__dirname}", "src/server.py"],
+      "env": { "RAPIDAPI_KEY": "${user_config.rapidapi_key}" }
+    }
+  },
+  "tools": [
+    { "name": "redact_text", "description": "Redact personal data in a text; returns placeholders and entity types, not the original values." },
+    { "name": "redact_file", "description": "Redact a UTF-8 file into a new file without reading it into the conversation; writes a restore mapping." },
+    { "name": "restore_file", "description": "Put the original values back into a file using the mapping, offline." }
+  ],
+  "user_config": {
+    "rapidapi_key": {
+      "type": "string",
+      "title": "RapidAPI key",
+      "description": "Your RapidAPI key, subscribed to EU PII Redaction (the free plan works): https://rapidapi.com/JulianJohansen/api/eu-pii-redaction/pricing",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "linux", "win32"],
+    "runtimes": { "python": ">=3.10" }
+  },
+  "keywords": ["pii", "redaction", "gdpr", "privacy", "anonymization", "eu"],
+  "license": "MIT"
+}
