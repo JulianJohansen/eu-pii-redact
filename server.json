@@ -1,0 +1,29 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.JulianJohansen/eu-pii-redact",
+  "title": "EU PII Redaction",
+  "description": "Redact EU personal data (names, national IDs, IBANs) in text and files; restore it later.",
+  "version": "0.1.0",
+  "websiteUrl": "https://rapidapi.com/JulianJohansen/api/eu-pii-redaction",
+  "repository": {
+    "url": "https://github.com/JulianJohansen/eu-pii-redact",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "eu-pii-redact",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "RAPIDAPI_KEY",
+          "description": "RapidAPI key subscribed to EU PII Redaction (free plan: 500 requests/month).",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
