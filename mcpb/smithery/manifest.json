@@ -30,15 +30,153 @@
   "tools": [
     {
       "name": "redact_text",
-      "description": "Redact personal data in a text; returns placeholders and entity types, not the original values."
+      "description": "Redact personal data in a text; returns placeholders and entity types, not the original values.",
+      "inputSchema": {
+        "properties": {
+          "text": {
+            "description": "Text to redact.",
+            "title": "Text",
+            "type": "string"
+          },
+          "types": {
+            "anyOf": [
+              {
+                "items": {
+                  "enum": [
+                    "PERSON",
+                    "EMAIL",
+                    "PHONE",
+                    "IBAN",
+                    "CREDIT_CARD",
+                    "EU_VAT",
+                    "NATIONAL_ID",
+                    "IP_ADDRESS"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only these types; default all.",
+            "title": "Types"
+          },
+          "mode": {
+            "default": "label",
+            "description": "\"label\" replaces with [TYPE_n] placeholders, \"mask\" with asterisks.",
+            "enum": [
+              "label",
+              "mask"
+            ],
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "type": "object",
+        "title": "redact_textArguments"
+      }
     },
     {
       "name": "redact_file",
-      "description": "Redact a UTF-8 file into a new file without reading it into the conversation; writes a restore mapping."
+      "description": "Redact a UTF-8 file into a new file without reading it into the conversation; writes a restore mapping.",
+      "inputSchema": {
+        "properties": {
+          "input_path": {
+            "description": "UTF-8 text file to redact (.txt, .md, .csv, .json, .log, .eml...).",
+            "title": "Input Path",
+            "type": "string"
+          },
+          "output_path": {
+            "description": "Where to write the redacted copy.",
+            "title": "Output Path",
+            "type": "string"
+          },
+          "types": {
+            "anyOf": [
+              {
+                "items": {
+                  "enum": [
+                    "PERSON",
+                    "EMAIL",
+                    "PHONE",
+                    "IBAN",
+                    "CREDIT_CARD",
+                    "EU_VAT",
+                    "NATIONAL_ID",
+                    "IP_ADDRESS"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only these types; default all.",
+            "title": "Types"
+          },
+          "save_mapping": {
+            "default": true,
+            "description": "Also write <output_path>.map.json (owner-only permissions) so restore_file can put the original values back later.",
+            "title": "Save Mapping",
+            "type": "boolean"
+          },
+          "overwrite": {
+            "default": false,
+            "title": "Overwrite",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "input_path",
+          "output_path"
+        ],
+        "type": "object",
+        "title": "redact_fileArguments"
+      }
     },
     {
       "name": "restore_file",
-      "description": "Put the original values back into a file using the mapping, offline."
+      "description": "Put the original values back into a file using the mapping, offline.",
+      "inputSchema": {
+        "properties": {
+          "input_path": {
+            "description": "File containing placeholders, e.g. an edited redacted file or an LLM answer saved to disk.",
+            "title": "Input Path",
+            "type": "string"
+          },
+          "mapping_path": {
+            "description": "The .map.json written by redact_file.",
+            "title": "Mapping Path",
+            "type": "string"
+          },
+          "output_path": {
+            "description": "Where to write the restored file.",
+            "title": "Output Path",
+            "type": "string"
+          },
+          "overwrite": {
+            "default": false,
+            "title": "Overwrite",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "input_path",
+          "mapping_path",
+          "output_path"
+        ],
+        "type": "object",
+        "title": "restore_fileArguments"
+      }
     }
   ],
   "user_config": {
