@@ -3,6 +3,9 @@
 Keep European personal data out of LLM prompts and logs, and put it back in the answer.
 Python client, LangChain integration and MCP server for the
 [EU PII Redaction API](https://rapidapi.com/JulianJohansen/api/eu-pii-redaction).
+**[Try it live without signing up](https://eu-id-check.julvankran.workers.dev/try)** ·
+[Quickstart](https://eu-id-check.julvankran.workers.dev/quickstart) ·
+[Privacy and data processing](https://eu-id-check.julvankran.workers.dev/privacy)
 
 <!-- mcp-name: io.github.JulianJohansen/eu-pii-redact -->
 
