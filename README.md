@@ -100,8 +100,10 @@ claude mcp add eu-pii-redact -e RAPIDAPI_KEY=your-key -- uvx eu-pii-redact
 
 ## Postman
 
-Import `postman/eu-pii-redaction.postman_collection.json`, set the collection variable
-`rapidapi_key`, and send: four requests with example responses and built-in tests.
+Fork the public collection from the
+[EU PII Redaction workspace](https://www.postman.com/jejvks-team/eu-pii-redaction/overview) (or import
+`postman/eu-pii-redaction.postman_collection.json`), set the collection variable `rapidapi_key`, and send:
+four requests with example responses and built-in tests.
 
 ## Limits
 
